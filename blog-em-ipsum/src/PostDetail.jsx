@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchComments } from "./api";
 import "./PostDetail.css";
 
-export function PostDetail({ post, deleteMutation }) {
+export function PostDetail({ post, deleteMutation, updateTitle }) {
   // console.log(post);
   // replace with useQuery
 
@@ -30,10 +30,30 @@ export function PostDetail({ post, deleteMutation }) {
   return (
     <>
       <h3 style={{ color: "blue" }}>{post.title}</h3>
-      <button onClick={() => deleteMutation.mutate(post.id)}>
-        Delete
-      </button>{" "}
-      <button>Update title</button>
+      <div>
+        {deleteMutation.isError && (
+          <p className="error">There is error in deleting the post</p>
+        )}
+        {deleteMutation.isLoading && (
+          <p className="loading">Deleting the Post</p>
+        )}
+        {deleteMutation.isSuccess && (
+          <p className="success">Post (not) deleted</p>
+        )}
+        <button onClick={() => deleteMutation.mutate(post.id)}>Delete</button>
+      </div>
+
+      <div>
+        {updateTitle.isLoading && (
+          <p className="loading">Updating the title...</p>
+        )}
+        {updateTitle.isSuccess && <p className="success"> the title was (not) updated</p>}
+        {updateTitle.isError && (
+          <p className="error">There is error while updating the title</p>
+        )}
+        <button onClick={() => updateTitle.mutate(post.id)}>Update title</button>
+      </div>
+
       <p>{post.body}</p>
       <h4>Comments</h4>
       {data.map((comment) => (
