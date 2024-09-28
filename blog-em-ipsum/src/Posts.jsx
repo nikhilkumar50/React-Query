@@ -1,34 +1,46 @@
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
 import { fetchPosts, deletePost, updatePost } from "./api";
-// import { PostDetail } from "./PostDetail";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PostDetail } from "./PostDetail";
+
 const maxPostPage = 10;
 
 export function Posts() {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // replace with useQuery
-  const {data ,isLoading,isError,error} = useQuery({
-    queryKey:["posts"],
-    queryFn:fetchPosts
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: (postId) => deleteMutation(postId),
   });
 
-  if(isLoading){
-    return(
-        <>
-            Loading.....
-        </>
-    )
+  useEffect(() => {
+    if (currentPage < maxPostPage) {
+      const nextPage = currentPage + 1;
+      queryClient.prefetchQuery({
+        queryKey: ["posts", nextPage],
+        queryFn: () => fetchPosts(nextPage),
+      });
+    }
+  }, [currentPage, queryClient]);
+
+  // replace with useQuery
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["posts", currentPage],
+    queryFn: () => fetchPosts(currentPage),
+  });
+
+  if (isLoading) {
+    return <>Loading.....</>;
   }
-  if(isError){
-    return(
-        <>
-            <h3>You are not allowed to access data</h3>
-            <p>{error.toString()}</p>
-        </>
-    )
+  if (isError) {
+    return (
+      <>
+        <h3>You are not allowed to access data</h3>
+        <p>{error.toString()}</p>
+      </>
+    );
   }
 
   return (
@@ -45,16 +57,24 @@ export function Posts() {
         ))}
       </ul>
       <div className="pages">
-        <button disabled onClick={() => {}}>
+        <button
+          disabled={currentPage <= 1}
+          onClick={() => setCurrentPage((previousValue) => previousValue - 1)}
+        >
           Previous page
         </button>
-        <span>Page {currentPage + 1}</span>
-        <button disabled onClick={() => {}}>
+        <span>Page {currentPage}</span>
+        <button
+          disabled={currentPage >= maxPostPage}
+          onClick={() => setCurrentPage((previousValue) => previousValue + 1)}
+        >
           Next page
         </button>
       </div>
       <hr />
-      {selectedPost && <PostDetail post={selectedPost} />}
+      {selectedPost && (
+        <PostDetail post={selectedPost} deleteMutation={deleteMutation} />
+      )}
     </>
   );
 }
