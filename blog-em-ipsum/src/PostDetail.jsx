@@ -34,8 +34,8 @@ export function PostDetail({ post, deleteMutation, updateTitle }) {
         {deleteMutation.isError && (
           <p className="error">There is error in deleting the post</p>
         )}
-        {deleteMutation.isLoading && (
-          <p className="loading">Deleting the Post</p>
+        {deleteMutation.isPending && (
+          <p className="pending">Deleting the Post</p>
         )}
         {deleteMutation.isSuccess && (
           <p className="success">Post (not) deleted</p>
@@ -44,8 +44,8 @@ export function PostDetail({ post, deleteMutation, updateTitle }) {
       </div>
 
       <div>
-        {updateTitle.isLoading && (
-          <p className="loading">Updating the title...</p>
+        {updateTitle.isPending && (
+          <p className="pending">Updating the title...</p>
         )}
         {updateTitle.isSuccess && <p className="success"> the title was (not) updated</p>}
         {updateTitle.isError && (
